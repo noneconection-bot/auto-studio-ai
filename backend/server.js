@@ -11,23 +11,44 @@ const client = new OpenAI({
 });
 
 app.post("/generate", async (req, res) => {
-  const { topic } = req.body;
+  try {
+    const { topic } = req.body;
 
-  const response = await client.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages: [
-      {
-        role: "user",
-        content: `Create YouTube Title, Description, Tags, Script for: ${topic}`
-      }
-    ],
-  });
+    const response = await client.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "user",
+          content: `
+You are a YouTube content creator AI.
 
-  res.json({
-    result: response.choices[0].message.content
-  });
+Topic: ${topic}
+
+Return STRICT format:
+
+Title: 
+Description: 
+Tags: 
+Script:
+          `
+        }
+      ],
+    });
+
+    const text = response.choices[0].message.content;
+
+    res.json({
+      result: text
+    });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      error: "AI failed to generate content"
+    });
+  }
 });
 
 app.listen(3000, () => {
-  console.log("Server running");
+  console.log("Server running on port 3000");
 });
