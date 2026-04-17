@@ -1,21 +1,33 @@
-const express = require("express");
-const cors = require("cors");
+import express from "express";
+import cors from "cors";
+import OpenAI from "openai";
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.post("/generate", (req, res) => {
-    const topic = req.body.topic;
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
-    res.json({
-        title: "🔥 Best Guide on " + topic,
-        description: "This video explains " + topic + " in detail.",
-        tags: topic + ", tutorial, AI, youtube",
-        script: "Intro: Today we talk about " + topic
-    });
+app.post("/generate", async (req, res) => {
+  const { topic } = req.body;
+
+  const response = await client.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [
+      {
+        role: "user",
+        content: `Create YouTube Title, Description, Tags, Script for: ${topic}`
+      }
+    ],
+  });
+
+  res.json({
+    result: response.choices[0].message.content
+  });
 });
 
 app.listen(3000, () => {
-    console.log("Server running");
+  console.log("Server running");
 });
