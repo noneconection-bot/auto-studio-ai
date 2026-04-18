@@ -1,54 +1,19 @@
-import express from "express";
-import cors from "cors";
-import OpenAI from "openai";
+content: `
+You are a professional viral YouTube content creator.
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+Your job is to create UNIQUE high quality content for every topic.
 
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+Topic: "${topic}"
 
-app.post("/generate", async (req, res) => {
-  try {
-    const { topic } = req.body;
+IMPORTANT RULES:
+- Do NOT repeat generic templates
+- Make everything specific to the topic
+- Be creative and different every time
 
-    const response = await client.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "user",
-          content: `
-You are a YouTube content creator AI.
+Return EXACT format:
 
-Topic: ${topic}
-
-Return STRICT format:
-
-Title: 
-Description: 
-Tags: 
-Script:
-          `
-        }
-      ],
-    });
-
-    const text = response.choices[0].message.content;
-
-    res.json({
-      result: text
-    });
-
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      error: "AI failed to generate content"
-    });
-  }
-});
-
-app.listen(3000, () => {
-  console.log("Server running on port 3000");
-});
+Title: (viral catchy title based on topic)
+Description: (detailed engaging description)
+Tags: (comma separated SEO tags)
+Script: (full YouTube video script with intro, body, outro)
+`
